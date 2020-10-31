@@ -3,7 +3,3 @@ venv/
 .idea/
 *.pyc
 __pycache__/
-q<<<<<<< HEAD
-=======
-main.py
->>>>>>> d2f7a858c2744169a9b1af23170d0388a18ba7b9
