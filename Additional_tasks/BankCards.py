@@ -37,11 +37,3 @@ class BankCard:
 
 
 
-card1 = BankCard('5678-5467-65456-7634', 'Ivan Ivanov', '15/21', '1234', 3000)
-print(card1.status)
-c = card1.chech_PIN()
-print(c)
-card1.sub_money(250)
-print(card1.money)
-card1.sub_money(3000)
-print(card1.money)
