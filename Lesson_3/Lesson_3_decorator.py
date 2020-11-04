@@ -5,18 +5,18 @@ import time
 def repeat(number=2):
 
     def _repeat(func):
-        print(func.__name__)
+        #print(func.__name__)
 
         @wraps(func)
         def wrapper(host_):
-            total: float = 0.0
+            start_total_time = time.time()
             for i in range(number):
-                t_time = time.time()
+                start_func_time = time.time()
                 result = func(host_)
-                tt_time = (time.time() - t_time)
-                print(f'time = {tt_time}')
-                total += tt_time
-            return result, total
+                print('time = {:>.3f}'.format(time.time() - start_func_time))
+            print('total time : {:>.3f}'.format(time.time() - start_total_time))
+            print(f'Name function: {func.__name__}')
+            return result
 
         return wrapper
 
@@ -24,7 +24,7 @@ def repeat(number=2):
 
 
 
-@repeat(10)
+@repeat(4)
 def connected(host_):
     response = requests.get(host_)
     return response.ok
