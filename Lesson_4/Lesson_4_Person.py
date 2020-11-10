@@ -19,7 +19,7 @@ class Person(ABC):
     def person_age_matching(self, from_, to_):
         today = date.today()
         person_age = today.year - self.birthday
-        if from_ <= person_age <= to_:
+        if from_ <= person_age <= to_ or from_ >= person_age >= to_:
             return self.show()
 
 
@@ -63,4 +63,4 @@ list_of_person = [applicant1, applicant2, applicant3, student1, student2, teache
 for item in list_of_person:
     item.show()
 print('-' * 18)
-[item.person_age_matching(18, 25) for item in list_of_person]
+[item.person_age_matching(25, 18) for item in list_of_person]
