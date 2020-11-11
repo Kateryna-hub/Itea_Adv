@@ -2,7 +2,7 @@ class Vehicle:
     doors = 4
     tires = 4
 
-    def __init__(self,brand, model, licence_plate):
+    def __init__(self, brand, model, licence_plate):
         self.brand = brand
         self.model = model
         self.licence_plate = licence_plate
