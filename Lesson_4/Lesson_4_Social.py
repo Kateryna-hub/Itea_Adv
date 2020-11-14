@@ -1,21 +1,14 @@
 from datetime import date
 import sys
-import shelve
+from abc import ABC, abstractmethod
 
 
-class Authorization:
-    _list_of_users = [{'Surname': 'Petrov', 'login': 'ivan123', 'password': '1Qaz@wsx', 'data': ''},
-                     {'Surname': 'Popov', 'login': 'Petro1', 'password': '1Qaz@wsx', 'data': ''},
-                     {'Surname': 'Ivanov', 'login': '123Ivanov', 'password': '1Qaz@wsx', 'data': ''}
-                     ]
-    log_on = ['OFF', '']
+class Authorization(ABC):
 
-    _instanst - None
-
-    def __new__(cls, *args, **kwargs):
-        if not cls._in
+    _list_of_users = [{'Surname': 'Petrov', 'login': 'ivan123', 'password': '1Qaz@wsx', 'data': ''}]
 
     def registration(self):
+        surname = input('Enter login: ')
         login = input('Enter login: ')
         for dict_ in self._list_of_users:
             if dict_.get('login') == login:
@@ -33,7 +26,7 @@ class Authorization:
         self.password = input('Enter password: ')
         for dict_ in self._list_of_users:
             if dict_.get('login') == self.login and dict_.get('password') == self.password:
-                dict_[5] = 'Off'
+                self.is_logon = True
                 print('Welcome\n')
             if dict_.get('login') == self.login and dict_.get('password') != self.password:
                 print('password is wrong')
@@ -51,7 +44,7 @@ class Authorization:
                     self.authentication()
                 if next_step == 'q':
                     sys.exit(0)
-        return self.login
+        return self.is_logonrjy
 
     def log_out(self):
         pass
@@ -84,15 +77,15 @@ class Authorization:
 
 
 class User(Authorization):
-    is_admin = True
 
-    def __init__(self, surname='', login='', password='', today=date.today()):
+
+    def __init__(self, surname='', login='', password='', today=date.today(), is_admin=False):
         super().__init__()
         self.surname = surname
         self.login = login
         self.password = password
         self.today = today
-
+        self.is_admin = is_admin
 
 
 class Post(User):
@@ -136,17 +129,20 @@ class Post(User):
 
 
 user1 = User()
-user2 = User()
-#user1.registration()
-logon1 = user1.authentication()
+print(dir(user1))
 post = Post()
-post.create_post(logon1)
-post.view_posts(logon1)
-print('-' * 10)
-logon2 = user1.authentication()
-post.view_posts(logon2)
-user1.create_post
-#print(Authorization.list_of_users)
+print(dir(post))
+# user2 = User()
+# #user1.registration()
+# logon1 = user1.authentication()
+# post = Post()
+# post.create_post(logon1)
+# post.view_posts(logon1)
+# print('-' * 10)
+# logon2 = user1.authentication()
+# post.view_posts(logon2)
+# user1.create_post
+# #print(Authorization.list_of_users)
 
 
 

@@ -3,33 +3,37 @@ from urllib.request import urlopen
 from functools import wraps
 
 
-def repeat(number_=1):
+def repeat(list_=[]):
 
     def thread_decor(func):
 
+        @wraps(func)
         def wrapper(*args):
-            thread_ = Thread(target=func, args=args)
-            thread_.start()
-            print(f'{item} started')
-            thread_.join()
-            print(f'{name} downloaded')
+            for item in list_:
+                filename = item[item.rfind("/") + 1:]
+                thread_ = Thread(target=func, args=(item, filename))
+                print(f'{thread_.getName()} started')
+                thread_.start()
+                print(f'{item}')
+                thread_.join()
+                print(f'{thread_.getName()} stopped')
             return thread_
         return wrapper
 
     return thread_decor
 
 
-list_of_links = ["http://www.google.com/images/srpr/logo1w.png", "http://www.google.com/images/srpr/logo2w.png",
+list_of_links = ["http://www.google.com/images/srpr/logo1w.png",
+                 "http://c.files.bbci.co.uk/106B9/production/_114675276_catindex.jpg",
+                 "https://download.geany.org/eht16-pubkey_old.txt",
                  'http://www.google.com/images/srpr/logo3w.png', 'http://www.google.com/images/srpr/logo4w.png',
                  'http://www.google.com/images/srpr/logo5w.png', 'http://www.google.com/images/srpr/logo6w.png',
                  'http://www.google.com/images/srpr/logo7w.png', 'http://www.google.com/images/srpr/logo8w.png',
                  'http://www.google.com/images/srpr/logo9w.png', 'http://www.google.com/images/srpr/logo10w.png'
                  ]
 
-number = len(list_of_links)
 
-
-@repeat(number)
+@repeat(list_of_links)
 def download_(url, file_name):
     open_url = urlopen(url)
     file_ = open(file_name, "wb")
@@ -37,9 +41,4 @@ def download_(url, file_name):
     file_.close()
 
 
-n = 0
-for item in list_of_links:
-    n += 1
-    name = 'logo' + str(n) + '.png'
-    download_(item, name)
-
+download_()
