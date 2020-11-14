@@ -1,40 +1,63 @@
 from datetime import date
+import sys
+import shelve
 
 
 class Authorization:
-    list_of_users = [{'Surname': 'Petrov', 'login': 'ivan123', 'password': '1Qaz@wsx', 'data': '', 'access': 'admin'},
-                     {'Surname': 'Popov', 'login': 'Peta1', 'password': '1Qaz@wsx', 'data': '', 'access': 'user'},
-                     {'Surname': 'Ivanov', 'login': '123Ivanov_I', 'password': '1Qaz@wsx', 'data': '', 'access': 'user'}
+    _list_of_users = [{'Surname': 'Petrov', 'login': 'ivan123', 'password': '1Qaz@wsx', 'data': ''},
+                     {'Surname': 'Popov', 'login': 'Petro1', 'password': '1Qaz@wsx', 'data': ''},
+                     {'Surname': 'Ivanov', 'login': '123Ivanov', 'password': '1Qaz@wsx', 'data': ''}
                      ]
-    posts = []
     log_on = ['OFF', '']
 
-    def __init__(self, surname, login, password, access, today=date.today()):
-        self.today = today
-        self.surname = surname
-        self.login = login
-        self.password = password
-        self.access = access
+    _instanst - None
+
+    def __new__(cls, *args, **kwargs):
+        if not cls._in
 
     def registration(self):
-        login = self.check_login(self.list_of_users)
-        password = self.check_password()
-        self.list_of_users.append({'name': self.surname, 'login': login[0], 'password': password[0],
-                                   'date': self.today, 'access': 'user'})
-        print('Successful')
+        login = input('Enter login: ')
+        for dict_ in self._list_of_users:
+            if dict_.get('login') == login:
+                print('LOGIN already exist')
+                self.registration()
+            else:
+                password = self.password_valid()
+                self._list_of_users.append({'name': self.surname, 'login': login[0], 'password': password[0],
+                                           'date': self.today, 'access': 'user', 'status': 'OFF'})
+                print('Successful')
+        return login
 
     def authentication(self):
         self.login = input('Enter LOGIN: ')
         self.password = input('Enter password: ')
-        for dict_ in self.list_of_users:
+        for dict_ in self._list_of_users:
             if dict_.get('login') == self.login and dict_.get('password') == self.password:
-                print('Welcome')
-                self.log_on = ['ON', dict_.get('login')]
-                print(self.log_on)
-        return self.log_on
+                dict_[5] = 'Off'
+                print('Welcome\n')
+            if dict_.get('login') == self.login and dict_.get('password') != self.password:
+                print('password is wrong')
+                self.authentication()
+            if dict_.get('login') != self.login and dict_.get('password') != self.password:
+                print('There is not such user\n')
+                next_step = input('to repeat LOG ON press "1"\n'
+                                  'for REGISTRATION PRESS "2"\n'
+                                  'or press "q" for EXIT: ')
+                if next_step == '1':
+                    self.authentication()
+                if next_step == '2':
+                    self.registration()
+                    print('Now you can LOG ON ')
+                    self.authentication()
+                if next_step == 'q':
+                    sys.exit(0)
+        return self.login
+
+    def log_out(self):
+        pass
 
     @staticmethod
-    def check_password():
+    def password_valid():
         _password = ''
         flag_password = '2'
         while flag_password == '2':
@@ -47,10 +70,10 @@ class Authorization:
             if any(map(str.isdigit, _password)):
                 if any(map(str.isalpha, _password)):
                     if not _password.isalnum():
-                        if len(_password)-1 >= 10:
+                        if len(_password) >= 10:
                             flag_password = '1'
                         else:
-                            print('password must contain 10 or more sybbols')
+                            print('password must contain 10 or more symbols')
                     else:
                         print('password must contain the special symbol')
                 else:
@@ -59,73 +82,70 @@ class Authorization:
                 print('password must contain the number')
         return _password
 
-    @staticmethod
-    def check_login(list_of_users):
-        login = input('Enter LOGIN: ')
-        for dict_ in list_of_users:
-            while dict_.get('login') == login:
-                print('This login already exists.')
-                login = input('Enter LOGIN: ')
-        return login
-
- #   @property
-
 
 class User(Authorization):
+    is_admin = True
 
-    def __init__(self, surname = '', login = '', password = '', today = date.today(), access = 'User'):
-        super(User, self).__init__(surname, login, password, today)
-        #self.name = name
-        self.access = access
+    def __init__(self, surname='', login='', password='', today=date.today()):
+        super().__init__()
+        self.surname = surname
+        self.login = login
+        self.password = password
+        self.today = today
 
 
-class Post(Authorization):
+
+class Post(User):
     key_status = 0
     key_login = 1
+    posts = [{'user': 'Petro1', 'title': 'post1', 'content': 'some kind of text', 'data created': '2020-11-11'}]
 
-    def __init__(self, surname = '', login = '', password = '', today = '', post_title = '', content = '', access = ''):
+    def __init__(self, surname='', login='', password='', today='', post_title='', content=''):
         super(Post, self).__init__(surname, login, password, today)
         self.post_title = post_title
         self.content = content
-        self.access = access
+
 
     def create_post(self):
-        print(self.log_on)
-        if self.log_on[self.key_status] == 'ON':
-            self.login = self.log_on[self.key_login]
-            self.post_title = input('Enter title og POST: ')
-            self.content = input('Enter content: ')
-            self.today = date.today()
-            self.posts.append({'user': self.login, 'title': self.post_title, 'content': self.content,
-                               'data created': self.today})
-        else:
-            print('You are not logged ON')
+        for dict_ in self._list_of_users:
+            if dict_.get('status') == 'ON':
+                self.login = status_[self.key_login]
+                self.post_title = input('Enter title og POST: ')
+                self.content = input('Enter content: ')
+                self.today = date.today()
+                self.posts.append({'user': self.login, 'title': self.post_title, 'content': self.content,
+                                   'data created': self.today})
+            else:
+                print('You are not logged ON')
 
-    def view_posts(self):
-        if self.log_on[self.key_status] == 'ON':
-            for dict_ in self.list_of_users:
-                if dict_.get('login') == self.key_login and dict_.get('access') == 'admin':
-                    for post in self.posts:
-                        print('{] {} {} {}'.format(dict_.get('user'), dict_.get('title'),
-                                                   dict_.get('content'), dict_.get('data created')))
-                elif dict_.get('login') == self.key_login and dict_.get('access') == 'user':
-                    for post in self.posts:
-                        if post.get('user') == self.key_login:
-                            print('{] {} {} {}'.format(dict_.get('user'), dict_.get('title'),
-                                                       dict_.get('content'), dict_.get('data created')))
-                else:
-                    print('You haven`t published a post yet')
+    def view_posts(self, status_):
+        if status_[self.key_status] == 'ON':
+            for dict_ in self._list_of_users:
+                if dict_.get('login') == status_[self.key_login]:
+                    if dict_.get('access') == 'admin':
+                        for post_ in self.posts:
+                            print('{} {} {} {}'.format(post_.get('user'), post_.get('title'),
+                                                       post_.get('content'), post_.get('data created')))
+                    if dict_.get('access') == 'user':
+                        for post_ in self.posts:
+                            if post_.get('user') == self.key_login:
+                                print('{} {} {} {}'.format(post_.get('user'), post_.get('title'),
+                                                           post_.get('content'), post_.get('data created')))
+                    else:
+                        print('You haven`t published a post yet')
 
 
-user = User()
-#user.registration()
-user.authentication()
-print(Post.posts)
+user1 = User()
+user2 = User()
+#user1.registration()
+logon1 = user1.authentication()
 post = Post()
-post.create_post()
-
-
-# Post.view_posts()
+post.create_post(logon1)
+post.view_posts(logon1)
+print('-' * 10)
+logon2 = user1.authentication()
+post.view_posts(logon2)
+user1.create_post
 #print(Authorization.list_of_users)
 
 
