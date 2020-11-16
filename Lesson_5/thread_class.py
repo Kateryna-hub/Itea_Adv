@@ -19,7 +19,6 @@ class MyThread(Thread):
 
 list_of_links = ["http://www.google.com/images/srpr/logo1w.png",
                  "http://c.files.bbci.co.uk/106B9/production/_114675276_catindex.jpg",
-                 "https://download.geany.org/eht16-pubkey_old.txt",
                  'http://www.google.com/images/srpr/logo3w.png', 'http://www.google.com/images/srpr/logo4w.png',
                  'http://www.google.com/images/srpr/logo5w.png', 'http://www.google.com/images/srpr/logo6w.png',
                  'http://www.google.com/images/srpr/logo7w.png', 'http://www.google.com/images/srpr/logo8w.png',
