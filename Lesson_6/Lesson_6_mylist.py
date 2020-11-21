@@ -1,4 +1,4 @@
-class MyList:
+class MyList(object):
 
     def __init__(self, obj, index_):
         self.obj = obj
