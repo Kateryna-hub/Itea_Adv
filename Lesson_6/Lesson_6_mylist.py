@@ -1,8 +1,7 @@
 class MyList(object):
 
-    def __init__(self, obj, index_):
-        self.obj = obj
-        self.index_ = index_
+    def __init__(self, elements=0):
+        self.my_list = [0] * elements
 
     def __iter__(self):
         return self
