@@ -218,49 +218,50 @@ class User(AuthorizationMixin):
         self.find_student(card)
         self.get_score_student(card)
 
+if __name__ == '__main__':
 
-user1 = User()
-user1.authentication(login=input('введите логин "login": '), password=input('введите "password": '))
-user1.list_of_students()
-print('_' * 30)
-user1.get_full_info_stud(input('Введите номер студенческого: '))
-print('_' * 30)
-user1.best_students()
-print('_' * 30)
-user1.find_student(input('Введите номер студенческого: '))
-table = ''
-var1 = ''
-var2 = ''
-t1 = input('1 - surname, 2 - group, 3 department')
-if t1 == '1':
-    table = 'students'
-    var1 = 'Surname'
-    var2 = input('Введите новую фамилию: ')
-if t1 == '2':
-    table = 'students'
-    var1 = 'group_name'
-    var2 = input('Введите группу: ')
-if t1 == '3':
-    user1.show_departments()
-    table = 'students'
-    var1 = 'd_short_name'
-    var2 = input('Введите аббревиатуру факультета: ')
-user1.update_student_info(table=table, var1=var1, var2=var2, card_=input('Введите номер студенческого: '))
-user1.list_of_students()
-
-user2 = User()
-user2.registration(login=input('регистрация нового пользователя\n введите Login: '),
-                   password=input('введите password: '), confirm_password=input('подтвердите password: '))
-user2.authentication(login=input('введите логин "login": '), password=input('введите логин "password": '))
-user2.list_of_students()
-print('_' * 30)
-user2.find_student(card=input('чтобы найти сдудента введите номер его студенческого билета\n: '))
-print('_' * 30)
-user1.add_student(surname=input("Для добавления студента в БД заполните данные\n Введите фамилию: "),
-                  first_name=input("Введите имя: "),
-                  card=input("Введите номер студенческого билета: "), group_name=input("Введите группу: "),
-                  dep_short=input(f'Введите факультет'))
-print('_' * 30)
+    user1 = User()
+    user1.authentication(login=input('введите логин "login": '), password=input('введите "password": '))
+    user1.list_of_students()
+    print('_' * 75)
+    user1.get_full_info_stud(input('Введите номер студенческого: '))
+    print('_' * 75)
+    user1.best_students()
+    print('_' * 75)
+    user1.find_student(input('Введите номер студенческого: '))
+    table = ''
+    var1 = ''
+    var2 = ''
+    t1 = input('1 - surname, 2 - group, 3 department')
+    if t1 == '1':
+        table = 'students'
+        var1 = 'Surname'
+        var2 = input('Введите новую фамилию: ')
+    if t1 == '2':
+        table = 'students'
+        var1 = 'group_name'
+        var2 = input('Введите группу: ')
+    if t1 == '3':
+        user1.show_departments()
+        table = 'students'
+        var1 = 'd_short_name'
+        var2 = input('Введите аббревиатуру факультета: ')
+    user1.update_student_info(table=table, var1=var1, var2=var2, card_=input('Введите номер студенческого: '))
+    user1.list_of_students()
+    print('_' * 75)
+    user2 = User()
+    user2.registration(login=input('регистрация нового пользователя\n введите Login: '),
+                       password=input('введите password: '), confirm_password=input('подтвердите password: '))
+    user2.authentication(login=input('введите логин "login": '), password=input('введите логин "password": '))
+    user2.list_of_students()
+    print('_' * 75)
+    user2.find_student(card=input('чтобы найти сдудента введите номер его студенческого билета\n: '))
+    print('_' * 75)
+    user1.add_student(surname=input("Для добавления студента в БД заполните данные\n Введите фамилию: "),
+                      first_name=input("Введите имя: "),
+                      card=input("Введите номер студенческого билета: "), group_name=input("Введите группу: "),
+                      dep_short=input(f'Введите факультет'))
+    print('_' * 75)
 
 
 
