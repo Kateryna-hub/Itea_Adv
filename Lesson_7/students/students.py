@@ -1,4 +1,5 @@
 import sqlite3
+import sys
 
 
 class DB:
@@ -25,9 +26,15 @@ class AuthorizationMixin:
     @staticmethod
     def get_user(login):
         with DB("students.db") as db:
-            user = db.execute(* ('SELECT users.login, users.password, users.is_admin '
-                                 'FROM users WHERE users.login = ?', (login,)))
-            return user.fetchone()
+            user = []
+            user_get = (db.execute(* ('SELECT users.login, users.password, users.is_admin '
+                                      'FROM users WHERE users.login = ?', (login,)))).fetchone()
+            if user_get is None:
+                sys.exit("no such user")
+            else:
+                user = user_get
+
+            return user
 
     @staticmethod
     def password_valid(_password, _confirm_password):
@@ -40,15 +47,15 @@ class AuthorizationMixin:
                             if len(_password) >= 10:
                                 flag_password = True
                             else:
-                                print('password must contain 10 or more symbols')
+                                sys.exit('password must contain 10 or more symbols')
                         else:
-                            print('password must contain the special symbol')
+                            sys.exit('password must contain the special symbol')
                     else:
-                        print('password must contain the letter')
+                        sys.exit('password must contain the letter')
                 else:
-                    print('password must contain the number')
+                    sys.exit('password must contain the number')
             else:
-                print('The passwords are not the same')
+                sys.exit('The passwords are not the same')
         return flag_password
 
     def registration(self, login, password, confirm_password, is_admin='False'):
@@ -91,145 +98,170 @@ class User(AuthorizationMixin):
         super().__init__()
 
     def list_of_students(self):
-        list_studs = ('SELECT s.Surname, s.First_Name, s.group_name, d.name '
-                      'FROM students as s INNER JOIN departments as d '
-                      'ON s.departments_id = d.id')
+        sql_list_students = ('SELECT s.Surname, s.First_Name, s.ID_card, s.group_name, d.full_name '
+                             'FROM students as s INNER JOIN departments as d '
+                             'ON s.dep_short = d.short_name')
         if self.sign_on:
             with DB("students.db") as db:
-                list_students = (db.execute(list_studs)).fetchall()
-                print('%-12s %-10s %-8s %-30s' % ('Фамилия', 'Имя', 'Группа', 'Факультет'))
+                list_students = (db.execute(sql_list_students)).fetchall()
+                print('%-12s %-10s %-10s %-8s %-30s' % ('Фамилия', 'Имя', 'Ст.билет', 'Группа', 'Факультет'))
                 for stud in list_students:
-                    print('%-12s %-10s %-8s %-30s' % (stud[0], stud[1], stud[2], stud[3]))
+                    print('%-12s %-10s %-8s %-8s %-30s' % (stud[0], stud[1], stud[2], stud[3], stud[4]))
         else:
             print('You haven`t signed on yet')
 
     def find_student(self, card):
-        find_student = ('SELECT s.id, s.Surname, s.First_Name, s.id_card, s.group_name, d.name '
-                        'FROM students as s INNER JOIN departments as d where s.ID_card = ?', (card,))
+        sql_find_student = ('SELECT s.Surname, s.First_Name, s.id_card, s.group_name, s.dep_short, d.full_name '
+                            'FROM students as s INNER JOIN departments as d ON s.dep_short = d.short_name '
+                            'WHERE s.ID_card = ?', (card,))
         if self.sign_on:
             with DB("students.db") as db:
-                find_stud = (db.execute(* find_student)).fetchone()
+                find_student = (db.execute(* sql_find_student)).fetchone()
+
                 print('%-10s %-10s %-7s %-6s %-30s' % ('Фамилия', 'Имя', 'ID_Card', 'Группа', 'Факультет'))
-                print('%-10s %-10s %-7s %-6s %-30s' % (find_stud[1], find_stud[2],
-                                                       find_stud[3], find_stud[4], find_stud[5]))
-                return find_stud
+                print('%-10s %-10s %-7s %-6s %-30s' % (find_student[0], find_student[1],
+                                                       find_student[2], find_student[3], find_student[5]))
+                return find_student
         else:
             print('You haven`t signed on yet')
 
-    def add_student(self, surname, first_name, card, group_name, department):
-        add_stud = ('INSERT INTO students (Surname, First_Name, ID_card, group_name, departments_id) '
-                    'VALUES (?, ?, ?, ?, ?)',
-                    (surname, first_name, card, group_name, department,))
+    def get_subjects_department(self, dep_short):
+        sql_get_subject = ('SELECT id, name, d_short_name FROM subjects '
+                           'WHERE (d_short_name = "All") OR (d_short_name = ?)', (dep_short,))
         if self.sign_on:
-            if self.is_admin:
-                with DB("students.db") as db:
-                    db.execute(* add_stud)
-            else:
-                print('You haven`t permission')
+            with DB("students.db") as db:
+                get_subjects = (db.execute(* sql_get_subject)).fetchone()
+                return get_subjects
         else:
             print('You haven`t signed on yet')
 
-    def add_score_to_stud(self, card, score, subject_id):
-        stud = self.find_student(card)
-        students_id = stud[0]
-
-        add_score = ('INSERT INTO assessments (students_id, subject_id, score) '
-                     'VALUES (?, ?, ?)', (students_id, subject_id, score,))
+    def get_score_student(self, card):
+        sql_get_scores = ('SELECT subjects.name, scores.score FROM scores '
+                          'INNER JOIN subjects ON scores.id_subject = subjects.id '
+                          'WHERE scores.id_card = ?', (card,))
         if self.sign_on:
-            if self.is_admin:
-                with DB("students.db") as db:
-                    db.execute(* add_score)
-            else:
-                print('You haven`t permission')
-        else:
-            print('You haven`t signed on yet')
+            with DB("students.db") as db:
+                get_scores = (db.execute(* sql_get_scores)).fetchall()
 
-    def add_subject(self, subject_name):
-        add_subject = ('INSERT INTO subjects (subject_name) VALUES ?', (subject_name,))
-        if self.sign_on:
-            if self.is_admin:
-                with DB("students.db") as db:
-                    db.execute(* add_subject)
-            else:
-                print('You haven`t permission')
+                for subject in get_scores:
+                    print('%-35s %-3s' % (subject[0], subject[1]))
+                return get_scores
         else:
             print('You haven`t signed on yet')
 
     def best_students(self):
-        best_studs = ('SELECT s.Surname, s.First_Name, s.group_name '
-                      'FROM students as s INNER join assessments as a '
-                      'ON a.students_id = s.id '
-                      'GROUP by a.students_id '
-                      'HAVING sum (score)/count(*)=5')
+        sql_best_students = ('SELECT s.Surname, s.First_Name, s.group_name, d.full_name '
+                             'FROM students as s '
+                             'INNER JOIN departments as d ON s.dep_short = d.short_name '
+                             'INNER JOIN scores '
+                             'ON scores.id_card = s.ID_card '
+                             'GROUP by scores.id_card '
+                             'HAVING sum (score)/count(*)=5')
         if self.sign_on:
             with DB("students.db") as db:
-                best_studs = (db.execute(best_studs)).fetchall()
-                print(best_studs)
-                print('%-10s %-10s %-7s' % ('Фамилия', 'Имя', 'Группа'))
-                for stud in best_studs:
-                    print('%-10s %-10s %-7s' % (stud[0], stud[1], stud[2]))
-                return best_studs
+                best_students = (db.execute(sql_best_students)).fetchall()
+                print("Список отличников")
+                for stud in best_students:
+                    print('%-12s %-10s %-6s %-30s' % (stud[0], stud[1], stud[2], stud[3]))
+
+                return best_students
+        else:
+            print('You haven`t signed on yet')
+
+    def add_student(self, surname, first_name, card, group_name, dep_short, score=0):
+        sql_add_student = ('INSERT INTO students (Surname, First_Name, ID_card, group_name, departments_id) '
+                           'VALUES (?, ?, ?, ?, ?)', (surname, first_name, card, group_name, dep_short,))
+        list_subjects = self.get_subjects_department(dep_short)
+        if self.sign_on:
+            if self.is_admin:
+                with DB("students.db") as db:
+                    db.execute(* sql_add_student)
+                    for subject in list_subjects:
+                        db.execute(* ('INSERT INTO scores (id_card, score, id_subject)'
+                                      'VALUES (?, ?, ? )', (card, score, subject)))
+            else:
+                print('You haven`t permission')
+        else:
+            print('You haven`t signed on yet')
+
+    def set_score_to_stud(self, card, new_score, subject_id):
+        sql_set_score = ('UPDATE scores SET score = ? '
+                         'WHERE (id_card = ?) AND (subject_id = ?)', (new_score, card, subject_id))
+        if self.sign_on:
+            if self.is_admin:
+                with DB("students.db") as db:
+                    db.execute(* sql_set_score)
+            else:
+                print('You haven`t permission')
+        else:
+            print('You haven`t signed on yet')
+
+    @staticmethod
+    def show_departments(self):
+        with DB("students.db") as db:
+            dep = (db.execute("SELECT * FROM departments")).fetchall()
+            for d in dep:
+                print(d[1], d[2])
+
+    def update_student_info(self, table, var1, var2, card_):
+        sql = 'UPDATE ' + table + ' SET ' + var1 + ' = "' + var2 + '" WHERE ID_card = ' + card_
+        if self.sign_on:
+            if self.is_admin:
+                with DB("students.db") as db:
+                    db.execute(str(sql))
+            else:
+                print('You haven`t permission')
         else:
             print('You haven`t signed on yet')
 
     def get_full_info_stud(self, card):
         self.find_student(card)
-        get_score = ('SELECT sbj.name, a.score FROM assessments as a '
-                     'INNER JOIN subjects as sbj ON a.subject_id = sbj.id '
-                     'INNER JOIN students ON a.students_id = students.id '
-                     'WHERE students.ID_card = ?', (card,))
-        if self.sign_on:
-            with DB("students.db") as db:
-                get_scores = (db.execute(* get_score)).fetchall()
-                for sc in get_scores:
-                    print('%-12s %-7s' % (sc[0], sc[1]))
-                return get_scores
-        else:
-            print('You haven`t signed on yet')
-
-
-def get_departments():
-    with DB("students.db") as db:
-        departments = db.execute('SELECT * FROM departments')
-        return departments.fetchall()
-
-
-def get_subjects():
-    with DB("students.db") as db:
-        subjects = db.execute('SELECT * FROM subjects')
-        return subjects.fetchall()
+        self.get_score_student(card)
 
 
 user1 = User()
-user1.authentication(login=input('введите логин "login": '), password=input('введите логин "password": '))
+user1.authentication(login=input('введите логин "login": '), password=input('введите "password": '))
+user1.list_of_students()
+print('_' * 30)
+user1.get_full_info_stud(input('Введите номер студенческого: '))
+print('_' * 30)
+user1.best_students()
+print('_' * 30)
+user1.find_student(input('Введите номер студенческого: '))
+table = ''
+var1 = ''
+var2 = ''
+t1 = input('1 - surname, 2 - group, 3 department')
+if t1 == '1':
+    table = 'students'
+    var1 = 'Surname'
+    var2 = input('Введите новую фамилию: ')
+if t1 == '2':
+    table = 'students'
+    var1 = 'group_name'
+    var2 = input('Введите группу: ')
+if t1 == '3':
+    user1.show_departments()
+    table = 'students'
+    var1 = 'd_short_name'
+    var2 = input('Введите аббревиатуру факультета: ')
+user1.update_student_info(table=table, var1=var1, var2=var2, card_=input('Введите номер студенческого: '))
+user1.list_of_students()
+
 user2 = User()
-#user2.registration(login=input('регистрация нового пользователя\n введите Login: '), password=input('введите password: '),
-#                  confirm_password=input('подтвердите password: '))
+user2.registration(login=input('регистрация нового пользователя\n введите Login: '),
+                   password=input('введите password: '), confirm_password=input('подтвердите password: '))
 user2.authentication(login=input('введите логин "login": '), password=input('введите логин "password": '))
 user2.list_of_students()
 print('_' * 30)
 user2.find_student(card=input('чтобы найти сдудента введите номер его студенческого билета\n: '))
 print('_' * 30)
-departs = get_departments()
-#user1.add_student(surname=input("Для добавления студента в БД заполните данные\n Введите фамилию: "), first_name=input("Введите имя: "),
-#                  card=input("Введите номер студенческого билета: "), group_name=input("Введите группу: "),
-#                  department=input(f' Введите номер факультета {departs}'))
+user1.add_student(surname=input("Для добавления студента в БД заполните данные\n Введите фамилию: "),
+                  first_name=input("Введите имя: "),
+                  card=input("Введите номер студенческого билета: "), group_name=input("Введите группу: "),
+                  dep_short=input(f'Введите факультет'))
 print('_' * 30)
-user2.get_full_info_stud(card=input('чтобы посмотреть оценки студента введите номер его студенческого билета\n: '))
-print('_' * 30)
-card_ = input("для добавления оценок студента в БД введите номер его студенческого билета: ")
-subj = get_subjects()
-for i in subj:
-    print(i)
-while True:
-    do_ = input('нажмите 1 для ввода оценок, 2 для добавления предмета или 0 для выхода: ')
-    if do_ == '1':
-        user1.add_score_to_stud(card=card_, subject_id=input('номер предмета: '), score=input('введите оценку: '))
-    if do_ == '2':
-        user1.add_subject(subject_name=input('введите название предмета: '))
-    else:
-        break
-user2.best_students()
+
 
 
 
