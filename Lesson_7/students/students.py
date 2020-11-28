@@ -156,7 +156,7 @@ class User(AuthorizationMixin):
                              'INNER JOIN scores '
                              'ON scores.id_card = s.ID_card '
                              'GROUP by scores.id_card '
-                             'HAVING sum (score)/count(*)=5')
+                             'HAVING AVG (score) = 5')
         if self.sign_on:
             with DB("students.db") as db:
                 best_students = (db.execute(sql_best_students)).fetchall()
@@ -165,6 +165,25 @@ class User(AuthorizationMixin):
                     print('%-12s %-10s %-6s %-30s' % (stud[0], stud[1], stud[2], stud[3]))
 
                 return best_students
+        else:
+            print('You haven`t signed on yet')
+
+    def good_students(self):
+        sql_good_students = ('SELECT s.Surname, s.First_Name, s.group_name, d.full_name '
+                             'FROM students as s '
+                             'INNER JOIN departments as d ON s.dep_short = d.short_name '
+                             'INNER JOIN scores '
+                             'ON scores.id_card = s.ID_card '
+                             'GROUP by scores.id_card '
+                             'HAVING AVG (score) > 4')
+        if self.sign_on:
+            with DB("students.db") as db:
+                good_students = (db.execute(sql_good_students)).fetchall()
+                print("Список студентов с оценками 4 и 5")
+                for stud in good_students:
+                    print('%-12s %-10s %-6s %-30s' % (stud[0], stud[1], stud[2], stud[3]))
+
+                return good_students
         else:
             print('You haven`t signed on yet')
 
@@ -203,8 +222,8 @@ class User(AuthorizationMixin):
             for d in dep:
                 print(d[1], d[2])
 
-    def update_student_info(self, table, var1, var2, card_):
-        sql = 'UPDATE ' + table + ' SET ' + var1 + ' = "' + var2 + '" WHERE ID_card = ' + card_
+    def update_student_info(self, table_, var1_, var2_, card):
+        sql = 'UPDATE ' + table_ + ' SET ' + var1_ + ' = "' + var2_ + '" WHERE ID_card = ' + card
         if self.sign_on:
             if self.is_admin:
                 with DB("students.db") as db:
@@ -215,8 +234,24 @@ class User(AuthorizationMixin):
             print('You haven`t signed on yet')
 
     def get_full_info_stud(self, card):
-        self.find_student(card)
-        self.get_score_student(card)
+        sql_full_info = ('SELECT s.Surname, s.First_Name, s.id_card, s.group_name, d.full_name, sb.name, sc.score '
+                         'FROM students as s INNER JOIN departments as d ON s.dep_short = d.short_name '
+                         'INNER JOIN scores as sc ON s.ID_card = sc.id_card '
+                         'INNER JOIN subjects as sb ON sc.id_subject = sb.id '
+                         'WHERE s.id_card = ?', (card,))
+        if self.sign_on:
+            with DB("students.db") as db:
+                full_info = (db.execute(* sql_full_info)).fetchall()
+                print('%-10s %-10s %-7s %-6s %-30s' % ('Фамилия', 'Имя', 'ID_Card', 'Группа', 'Факультет'))
+                print('%-10s %-10s %-7s %-6s %-30s' % (full_info[0][0], full_info[0][1],
+                                                       full_info[0][2], full_info[0][3], full_info[0][4]))
+                for item_ in full_info:
+                    print('%-35s %-3s ' % (item_[5], item_[6]))
+
+                return full_info
+        else:
+            print('You haven`t signed on yet')
+
 
 if __name__ == '__main__':
 
@@ -232,21 +267,21 @@ if __name__ == '__main__':
     table = ''
     var1 = ''
     var2 = ''
-    t1 = input('1 - surname, 2 - group, 3 department')
-    if t1 == '1':
+    what_update = input('1 - surname, 2 - group, 3 department')
+    if what_update == '1':
         table = 'students'
         var1 = 'Surname'
         var2 = input('Введите новую фамилию: ')
-    if t1 == '2':
+    if what_update == '2':
         table = 'students'
         var1 = 'group_name'
         var2 = input('Введите группу: ')
-    if t1 == '3':
+    if what_update == '3':
         user1.show_departments()
         table = 'students'
         var1 = 'd_short_name'
         var2 = input('Введите аббревиатуру факультета: ')
-    user1.update_student_info(table=table, var1=var1, var2=var2, card_=input('Введите номер студенческого: '))
+    user1.update_student_info(table_=table, var1_=var1, var2_=var2, card=input('Введите номер студенческого: '))
     user1.list_of_students()
     print('_' * 75)
     user2 = User()
@@ -254,6 +289,8 @@ if __name__ == '__main__':
                        password=input('введите password: '), confirm_password=input('подтвердите password: '))
     user2.authentication(login=input('введите логин "login": '), password=input('введите логин "password": '))
     user2.list_of_students()
+    print('_' * 75)
+    user2.good_students()
     print('_' * 75)
     user2.find_student(card=input('чтобы найти сдудента введите номер его студенческого билета\n: '))
     print('_' * 75)
