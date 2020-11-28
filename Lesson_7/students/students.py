@@ -103,10 +103,10 @@ class User(AuthorizationMixin):
                              'ON s.dep_short = d.short_name')
         if self.sign_on:
             with DB("students.db") as db:
-                list_students = (db.execute(sql_list_students)).fetchall()
+                list_students = (db.execute(sql_list_students))
                 print('%-12s %-10s %-10s %-8s %-30s' % ('Фамилия', 'Имя', 'Ст.билет', 'Группа', 'Факультет'))
-                for stud in list_students:
-                    print('%-12s %-10s %-8s %-8s %-30s' % (stud[0], stud[1], stud[2], stud[3], stud[4]))
+                for data in list_students:
+                    print('%-12s %-10s %-10s %-8s %-30s' % (data[0], data[1], data[2], data[3], data[4]))
         else:
             print('You haven`t signed on yet')
 
@@ -141,10 +141,10 @@ class User(AuthorizationMixin):
                           'WHERE scores.id_card = ?', (card,))
         if self.sign_on:
             with DB("students.db") as db:
-                get_scores = (db.execute(* sql_get_scores)).fetchall()
-
-                for subject in get_scores:
-                    print('%-35s %-3s' % (subject[0], subject[1]))
+                get_scores = (db.execute(* sql_get_scores))
+                print(get_scores)
+                for data in get_scores:
+                    print('%-37s %-3s' % (data[0], data[1]))
                 return get_scores
         else:
             print('You haven`t signed on yet')
@@ -159,7 +159,7 @@ class User(AuthorizationMixin):
                              'HAVING AVG (score) = 5')
         if self.sign_on:
             with DB("students.db") as db:
-                best_students = (db.execute(sql_best_students)).fetchall()
+                best_students = (db.execute(sql_best_students))
                 print("Список отличников")
                 for stud in best_students:
                     print('%-12s %-10s %-6s %-30s' % (stud[0], stud[1], stud[2], stud[3]))
@@ -178,7 +178,7 @@ class User(AuthorizationMixin):
                              'HAVING AVG (score) > 4')
         if self.sign_on:
             with DB("students.db") as db:
-                good_students = (db.execute(sql_good_students)).fetchall()
+                good_students = (db.execute(sql_good_students))
                 print("Список студентов с оценками 4 и 5")
                 for stud in good_students:
                     print('%-12s %-10s %-6s %-30s' % (stud[0], stud[1], stud[2], stud[3]))
@@ -218,7 +218,7 @@ class User(AuthorizationMixin):
     @staticmethod
     def show_departments(self):
         with DB("students.db") as db:
-            dep = (db.execute("SELECT * FROM departments")).fetchall()
+            dep = (db.execute("SELECT * FROM departments"))
             for d in dep:
                 print(d[1], d[2])
 
@@ -241,12 +241,14 @@ class User(AuthorizationMixin):
                          'WHERE s.id_card = ?', (card,))
         if self.sign_on:
             with DB("students.db") as db:
-                full_info = (db.execute(* sql_full_info)).fetchall()
+                full_info = (db.execute(* sql_full_info))
                 print('%-10s %-10s %-7s %-6s %-30s' % ('Фамилия', 'Имя', 'ID_Card', 'Группа', 'Факультет'))
-                print('%-10s %-10s %-7s %-6s %-30s' % (full_info[0][0], full_info[0][1],
-                                                       full_info[0][2], full_info[0][3], full_info[0][4]))
-                for item_ in full_info:
-                    print('%-35s %-3s ' % (item_[5], item_[6]))
+                info = full_info.fetchone()
+                print('%-10s %-10s %-7s %-6s %-30s' % (info[0], info[1],
+                                                       info[2], info[3], info[4]))
+                for data in full_info:
+                    print('%-37s %-3s' % (data[5], data[6]))
+                    #                                       data[2], data[3], data[4]))
 
                 return full_info
         else:
