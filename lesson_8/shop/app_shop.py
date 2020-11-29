@@ -40,6 +40,16 @@ def get_detail_product(category_name, product_name):
     return render_template('product_detail.html', product=product)
 
 
+@app.route('/add_category', methods=['GET', 'POST'])
+def add_category():
+    name = request.form.get('name')
+    if request.method == 'POST':
+        with DB("shop.db") as db:
+            db.execute(* ('INSERT INTO categories (name) VALUES (?)', (name,)))
+        return redirect(url_for('get_categories'))
+    return render_template('add_category.html')
+
+
 @app.route('/add_products', methods=['GET', 'POST'])
 def add_products():
     category = request.form.get('category')
@@ -48,7 +58,6 @@ def add_products():
     number = request.form.get('number')
     available = request.form.get('available')
     description = request.form.get('description')
-    print(category)
     if request.method == 'POST':
         with DB("shop.db") as db:
             category_id = (db.execute(* ('SELECT categories.id FROM categories WHERE categories.name = ?',
