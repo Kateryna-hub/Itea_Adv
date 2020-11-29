@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>shop</title>
+</head>
+<body>
+    <h2>shop offers a wide range of products</h2>
+
+    {% for category in categories %}
+    <p><h3><a href="/{{category}}">{{category}}</a></h3></p>
+    {% endfor %}
+</body>
+</html>
