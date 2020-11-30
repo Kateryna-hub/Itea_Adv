@@ -18,7 +18,5 @@ import mongoengine as me
 
 
 
-for num_p in range(1, 9):
-    t = 'p' + str(num_p)
-    print(t)
+
 
