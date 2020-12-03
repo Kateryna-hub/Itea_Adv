@@ -11,6 +11,5 @@ class DB:
         return self.cursor
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.connect.commit()
         self.cursor.close()
 

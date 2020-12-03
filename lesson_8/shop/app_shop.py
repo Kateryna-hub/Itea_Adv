@@ -46,6 +46,7 @@ def add_category():
     if request.method == 'POST':
         with DB("shop.db") as db:
             db.execute(* ('INSERT INTO categories (name) VALUES (?)', (name,)))
+            db.connection.commit()
         return redirect(url_for('get_categories'))
     return render_template('add_category.html')
 
@@ -64,6 +65,7 @@ def add_products():
                                          (category,)))).fetchone()
             db.execute(* ('INSERT INTO goods (name, price, number, available, description, category_id) '
                           'VALUES (?, ?, ?, ?, ?, ?)', (name, price, number, available, description, category_id[0],)))
+            db.connection.commit()
         return redirect(url_for('get_products', category_name=category))
     return render_template('add_product.html')
 

@@ -94,9 +94,6 @@ class AuthorizationMixin:
 
 class User(AuthorizationMixin):
 
-    def __init__(self):
-        super().__init__()
-
     def list_of_students(self):
         sql_list_students = ('SELECT s.Surname, s.First_Name, s.ID_card, s.group_name, d.full_name '
                              'FROM students as s INNER JOIN departments as d '
@@ -104,9 +101,7 @@ class User(AuthorizationMixin):
         if self.sign_on:
             with DB("students.db") as db:
                 list_students = (db.execute(sql_list_students))
-                print('%-12s %-10s %-10s %-8s %-30s' % ('Фамилия', 'Имя', 'Ст.билет', 'Группа', 'Факультет'))
-                for data in list_students:
-                    print('%-12s %-10s %-10s %-8s %-30s' % (data[0], data[1], data[2], data[3], data[4]))
+                return list_students
         else:
             print('You haven`t signed on yet')
 
@@ -116,12 +111,8 @@ class User(AuthorizationMixin):
                             'WHERE s.ID_card = ?', (card,))
         if self.sign_on:
             with DB("students.db") as db:
-                find_student = (db.execute(* sql_find_student)).fetchone()
-
-                print('%-10s %-10s %-7s %-6s %-30s' % ('Фамилия', 'Имя', 'ID_Card', 'Группа', 'Факультет'))
-                print('%-10s %-10s %-7s %-6s %-30s' % (find_student[0], find_student[1],
-                                                       find_student[2], find_student[3], find_student[5]))
-                return find_student
+                find_student_ = (db.execute(* sql_find_student)).fetchone()
+                return find_student_
         else:
             print('You haven`t signed on yet')
 
@@ -142,9 +133,8 @@ class User(AuthorizationMixin):
         if self.sign_on:
             with DB("students.db") as db:
                 get_scores = (db.execute(* sql_get_scores))
-                print(get_scores)
-                for data in get_scores:
-                    print('%-37s %-3s' % (data[0], data[1]))
+                for data_ in get_scores:
+                    print('%-37s %-3s' % (data_[0], data_[1]))
                 return get_scores
         else:
             print('You haven`t signed on yet')
@@ -259,13 +249,15 @@ if __name__ == '__main__':
 
     user1 = User()
     user1.authentication(login=input('введите логин "login": '), password=input('введите "password": '))
-    user1.list_of_students()
+    students = user1.list_of_students()
+    print('%-12s %-10s %-10s %-8s %-30s' % ('Фамилия', 'Имя', 'Ст.билет', 'Группа', 'Факультет'))
+    for data in students:
+        print('%-12s %-10s %-10s %-8s %-30s' % (data[0], data[1], data[2], data[3], data[4]))
     print('_' * 75)
     user1.get_full_info_stud(input('Введите номер студенческого: '))
     print('_' * 75)
     user1.best_students()
     print('_' * 75)
-    user1.find_student(input('Введите номер студенческого: '))
     table = ''
     var1 = ''
     var2 = ''
@@ -294,7 +286,10 @@ if __name__ == '__main__':
     print('_' * 75)
     user2.good_students()
     print('_' * 75)
-    user2.find_student(card=input('чтобы найти сдудента введите номер его студенческого билета\n: '))
+    find_student = user2.find_student(card=input('чтобы найти сдудента введите номер его студенческого билета\n: '))
+    print('%-10s %-10s %-7s %-6s %-30s' % ('Фамилия', 'Имя', 'ID_Card', 'Группа', 'Факультет'))
+    print('%-10s %-10s %-7s %-6s %-30s' % (find_student[0], find_student[1],
+                                           find_student[2], find_student[3], find_student[5]))
     print('_' * 75)
     user1.add_student(surname=input("Для добавления студента в БД заполните данные\n Введите фамилию: "),
                       first_name=input("Введите имя: "),
