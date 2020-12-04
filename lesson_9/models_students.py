@@ -72,15 +72,15 @@ if __name__ == '__main__':
     #     head = ''
     #     if department_ == departments[0] and group == groups[0]:
     #         head = heads[0]
-    #     if department_ == departments[0] and group == groups[1]:
+    #     elif department_ == departments[0] and group == groups[1]:
     #         head = heads[1]
-    #     if department_ == departments[1] and group == groups[0]:
+    #     elif department_ == departments[1] and group == groups[0]:
     #         head = heads[2]
-    #     if department_ == departments[1] and group == groups[1]:
+    #     elif department_ == departments[1] and group == groups[1]:
     #         head = heads[3]
-    #     if department_ == departments[2] and group == groups[0]:
+    #     elif department_ == departments[2] and group == groups[0]:
     #         head = heads[4]
-    #     if department_ == departments[2] and group == groups[1]:
+    #     elif department_ == departments[2] and group == groups[1]:
     #         head = heads[5]
     #     student = Student(full_name=student_name, group_name=group, group_head=head, department=department_).save()
     #     student_marks = StudentMarks(math=random.randint(50, 120), systems=random.randint(60, 120),
