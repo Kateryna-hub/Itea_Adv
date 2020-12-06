@@ -21,16 +21,20 @@ products = {'Onion': {
 
 products_json = json.dumps(products)
 products1 = json.loads(products_json)
-print(products)
+print(type(products))
+for p in products:
+    print(type(p))
+
+
 print('_' * 20)
 print(products_json)
 print('_' * 20)
 print(products1)
-
-print(type(products))
-
-f = open('myjson.json', 'r')
-#json.dump(products, f)
-data = json.load(f)
-print(data)
-f.close()
+#
+# print(type(products))
+#
+# f = open('myjson.json', 'r')
+# #json.dump(products, f)
+# data = json.load(f)
+# print(data)
+# f.close()
