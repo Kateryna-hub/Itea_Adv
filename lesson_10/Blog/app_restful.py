@@ -6,5 +6,5 @@ app = Flask(__name__)
 api = Api(app)
 
 
-api.add_resource(PostResource, '/post', '/post/<string:id>')
+api.add_resource(PostResource, '/post', '/post/author/<string:author>', '/post/tag/<string:tag>')
 
