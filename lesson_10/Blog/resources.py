@@ -11,16 +11,16 @@ class PostResource(Resource):
     def get(self, author=None, tag=None):
         if author:
             posts = BlogPost.objects(author=author)
-            posts.update(inc__post_view=1)
+            posts.modify(inc__post_view=1)
             return json.loads(posts.to_json())
         if tag:
             posts = BlogPost.objects(tags=tag)
-            posts.update(inc__post_view=1)
+            posts.modify(inc__post_view=1)
             return json.loads(posts.to_json())
 
         else:
             posts = BlogPost.objects()
-            posts.update(inc__post_view=1)
+            posts.modify(inc__post_view=1)
             return json.loads(posts.to_json())
 
     def post(self):
