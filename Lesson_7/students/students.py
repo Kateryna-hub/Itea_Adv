@@ -12,7 +12,7 @@ class DB:
         return self.cursor
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.connect.commit()
+        # self.connect.commit()
         self.cursor.close()
 
 
@@ -184,10 +184,20 @@ class User(AuthorizationMixin):
         if self.sign_on:
             if self.is_admin:
                 with DB("students.db") as db:
-                    db.execute(* sql_add_student)
+                    try:
+                        db.execute(* sql_add_student)
+                    except sqlite3.DatabaseError as err:
+                        print("Error: ", err)
+                    else:
+                        db.connection.commit()
                     for subject in list_subjects:
-                        db.execute(* ('INSERT INTO scores (id_card, score, id_subject)'
-                                      'VALUES (?, ?, ? )', (card, score, subject)))
+                        try:
+                            db.execute(* ('INSERT INTO scores (id_card, score, id_subject)'
+                                          'VALUES (?, ?, ? )', (card, score, subject)))
+                        except sqlite3.DatabaseError as err:
+                            print("Error: ", err)
+                        else:
+                            db.connection.commit()
             else:
                 print('You haven`t permission')
         else:
@@ -199,7 +209,12 @@ class User(AuthorizationMixin):
         if self.sign_on:
             if self.is_admin:
                 with DB("students.db") as db:
-                    db.execute(* sql_set_score)
+                    try:
+                        db.execute(* sql_set_score)
+                    except sqlite3.DatabaseError as err:
+                        print("Error: ", err)
+                    else:
+                        db.connection.commit()
             else:
                 print('You haven`t permission')
         else:
@@ -218,6 +233,7 @@ class User(AuthorizationMixin):
             if self.is_admin:
                 with DB("students.db") as db:
                     db.execute(str(sql))
+                    db.connection.commit()
             else:
                 print('You haven`t permission')
         else:
