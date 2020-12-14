@@ -3,27 +3,23 @@ from marshmallow import fields
 from marshmallow.validate import Length
 
 
-class AuthorSchema(Schema):
+class CategorySchema(Schema):
     id = fields.String(dump_only=True)
-    first_name = fields.String(validate=Length(min=2, max=65), required=True)
-    last_name = fields.String(validate=Length(min=2, max=65), required=True)
-    count_post = fields.Integer()
+    title = fields.String(validate=Length(min=2, max=65), required=True)
+    parent = fields.Nested('self')
+    subcategories = fields.Nested('self')
 
 
-class TagSchema(Schema):
+class ShopProductSchemaRead(Schema):
     id = fields.String(dump_only=True)
-    text = fields.String(validate=Length(min=2, max=65), required=True)
+    title = fields.String(required=True, max_length=256)
+    description = fields.String(max_length=512)
+    in_stock = fields.Boolean(default=True)
+    number = fields.Integer(default=0)
+    price = fields.Float(required=True)
+    category = fields.Nested(CategorySchema)
+    view = fields.Integer(default=0)
 
 
-class BlogPostSchemaRead(Schema):
-    id = fields.String(dump_only=True)
-    title = fields.String(validate=Length(min=2, max=100), required=True)
-    content = fields.String(required=True)
-    published = fields.DateTime(format='%Y-%m-%d %H:%M')
-    author = fields.Nested(AuthorSchema)
-    post_view = fields.Integer()
-    tags = fields.List(fields.Nested(TagSchema))
-
-
-class BlogPostSchemaWrite(BlogPostSchemaRead):
-    author = fields.String()
+class ShopProductSchemaWrite(ShopProductSchemaRead):
+    category = fields.String()

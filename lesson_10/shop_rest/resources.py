@@ -1,40 +1,50 @@
 from flask_restful import Resource
 from flask import request
-from Blog_models import BlogPost, Author
-from schemas import BlogPostSchemaRead, BlogPostSchemaWrite
+from shop_models import Product, Category
+from schemas import ShopProductSchemaRead, ShopProductSchemaWrite
 from marshmallow.exceptions import ValidationError
 import json
 
 
-class PostResource(Resource):
+class ShopResource(Resource):
 
-    def get(self, author=None, tag=None):
-        if author:
-            posts = BlogPost.objects(author=author)
-            posts.modify(inc__post_view=1)
-            return json.loads(posts.to_json())
-        if tag:
-            posts = BlogPost.objects(tags=tag)
-            posts.modify(inc__post_view=1)
-            return json.loads(posts.to_json())
+    def get(self, category=None, product=None, id=None):
+        if category:
+            categories = Category.objects(parent=category)
+            return json.loads(categories.to_json())
 
+        if product:
+            product = Product.objects(title__contains=product)
+            for p in product:
+                p.modify(inc__view=1)
+            return json.loads(product.to_json())
+        if id:
+            product = Product.objects(id=id)
+            product.modify(inc__view=1)
+            return json.loads(product.to_json())
         else:
-            posts = BlogPost.objects()
-            posts.modify(inc__post_view=1)
-            return json.loads(posts.to_json())
+            count_products = Product.objects.count()
+            total_price = Product.objects.sum('price')
+            shop = json.dumps({"products": count_products, "total_price": total_price})
+            return json.loads(shop)
 
     def post(self):
-
         try:
-            BlogPostSchemaWrite().load(request.json)
+            ShopProductSchemaWrite().load(request.json)
         except ValidationError as e:
             return {'text': str(e)}
-        post_ = BlogPost(**request.json).save()
-        post_.reload()
-        return BlogPostSchemaRead().dump(post_)
+        product = Product(**request.json).save()
+        product.reload()
+        return ShopProductSchemaRead().dump(product)
 
-    def put(self):
-        pass
+    def put(self, id):
+        product = Product.objects(id=id)
+        product.update(**request.json)
+        product.reload()
+        return json.loads(product.to_json())
 
-    def delete(self):
-        pass
+    def delete(self, id):
+        product = Product.objects(id=id)
+        product.delete()
+        text = f'Товар удален'
+        return text

@@ -1,42 +1,51 @@
 import mongoengine as me
-import datetime
 import random
 
 
-me.connect('BLOG')
+me.connect('SHOP10')
 
 
-class Author(me.Document):
-    first_name = me.StringField(min_length=2, max_length=65)
-    last_name = me.StringField(min_length=2, max_length=65)
-    count_post = me.IntField(default=0)
+class Category(me.Document):
+    title = me.StringField(required=True)
+    parent = me.ReferenceField('self')
+    subcategories = me.ListField(me.ReferenceField('self'))
 
     def __str__(self):
         return str(self.id)
 
+    def get_products(self):
+        return Product.objects(Category=self)
 
-class Tag(me.Document):
-    text = me.StringField()
+    @classmethod
+    def get_root_categories(cls):
+        return cls.objects(
+            parent=None
+        )
+
+    def is_root(self):
+        return not bool(self.parent)
+
+    def add_subcategory(self, category):
+        category.parent = self
+        category.save()
+        self.subcategories.append(category)
+        self.save()
 
 
-class BlogPost(me.Document):
-    title = me.StringField(min_length=2, max_length=100)
-    content = me.StringField()
-    published = me.DateTimeField()
-    author = me.ReferenceField(Author, reverse_delete_rule='CASCAD')
-    post_view = me.IntField(default=0)
-    tags = me.ListField(me.ReferenceField(Tag))
-
-    def save(self, *args, **kwargs):
-        self.published = datetime.datetime.now()
-        Author.objects(id=self.author).update_one(inc__count_post=1)
-        super().save(*args, **kwargs)
+class Product(me.Document):
+    title = me.StringField(required=True, max_length=256)
+    description = me.StringField(max_length=512)
+    in_stock = me.BooleanField(default=True)
+    number = me.IntField(default=0)
+    price = me.FloatField(required=True)
+    category = me.ReferenceField(Category)
+    view = me.IntField(default=0)
 
 
 if __name__ == '__main__':
     pass
-    # for ath in authors:
-    #     at = Author(first_name=ath[0], last_name=ath[1]).save()
+    # for c in categories:
+    #     at = Category().save()
     #     print(at.id)
     #
     # for dict_ in posts:
